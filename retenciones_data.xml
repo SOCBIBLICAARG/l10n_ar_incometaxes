@@ -12,7 +12,7 @@
 			<field name="name">IMPUESTO A LAS GANANCIAS</field>
 			<field name="code">010040</field>
 			<field name="sign">1</field>
-			<field name="parent_id" ref="l10n_ar_chart_generic.ri_impuestos_nacionales"/>
+			<field name="parent_id" ref="l10n_ar_chart.ri_impuestos_nacionales"/>
 		</record>
 
 				<record model="account.tax.code.template" id="ri_tax_code_ganancia">
@@ -39,15 +39,15 @@
 					<field name="amount">0</field>
 					<field name="type">percent</field>
 					<field name="applicable_type">true</field>
-					<field name="account_collected_id" ref="l10n_ar_chart_generic.ri_retencion_ganancias_a_depositar"/>
-					<field name="account_paid_id" ref="l10n_ar_chart_generic.ri_retencion_ganancias_a_depositar"/>
+					<field name="account_collected_id" ref="l10n_ar_chart.ri_retencion_ganancias_a_depositar"/>
+					<field name="account_paid_id" ref="l10n_ar_chart.ri_retencion_ganancias_a_depositar"/>
 					<field name="retencion_minima_inscriptos">20</field>
 					<field name="retencion_minima_no_inscriptos">100</field>
 					<field name="type_tax_use">purchase</field>
 				</record>
 	
         <record id="ri_tax_ganancias" model="account.tax.template">
-            <field name="chart_template_id" ref="l10n_ar_chart_generic.ri_l10nAR_chart_template"/>
+            <field name="chart_template_id" ref="l10n_ar_chart.ri_l10nAR_chart_template"/>
             <field name="name">01004000:G</field>
             <field name="description">Impuesto a las ganancias</field>
 	    <field name="sequence">101</field>
@@ -55,8 +55,8 @@
             <field name="type">percent</field>
             <field name="tax_code_id" ref="ri_tax_code_ganancia"/>
             <field name="ref_tax_code_id" ref="ri_tax_code_ganancia"/>
-            <field name="account_collected_id" ref="l10n_ar_chart_generic.ri_retencion_ganancias_a_depositar"/>
-            <field name="account_paid_id" ref="l10n_ar_chart_generic.ri_retencion_ganancias_a_depositar"/>
+            <field name="account_collected_id" ref="l10n_ar_chart.ri_retencion_ganancias_a_depositar"/>
+            <field name="account_paid_id" ref="l10n_ar_chart.ri_retencion_ganancias_a_depositar"/>
             <field name="type_tax_use">purchase</field>
         </record>
 <!--

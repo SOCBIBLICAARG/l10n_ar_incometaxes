@@ -269,32 +269,28 @@ class account_voucher(osv.osv):
         return (acumulado_retenciones)
 
     def calcular_retencion(self, cr, uid, ids, context):
-        # logger = netsvc.Logger()
-	# import pdb;pdb.set_trace()
         idsint = int(ids[0])
         cr.execute("DELETE FROM registro_retenciones WHERE voucher_id=%s ", (idsint,))
-        # logger.notifyChannel('addons.', netsvc.LOG_WARNING, 'paso 1 %s   ' % (ids))
-	logging.getLogger(__name__).warning('paso 1 %s   ' % (ids))
         monto_total_retenido = 0
         voucher = self.pool.get('account.voucher').browse(cr, uid, idsint)
         if not voucher.date:
             raise osv.except_osv(_('Error !'), _("Ingrese la fecha del comprobante"))
-        #fecha_desde= self.calcular_fecha_desdehasta(cr, uid, voucher.date)[0]
-        #fecha_hasta= self.calcular_fecha_desdehasta(cr, uid, voucher.date)[1]
         impuestos_ids = self.pool.get('account.tax.withhold').search(cr, uid, [('res_company_id', '=', voucher.company_id.id)])
         #~ verifico que company sea agente de retencion de al menos 1 impuesto.
 	# import pdb;pdb.set_trace()
         if len(impuestos_ids) == 0:
-            raise osv.except_osv(_('Error !'), _("Su compania no es agente de retencion de ningun impuesto.\nConfigure esto en Administracion/Companies "))
+        	raise osv.except_osv(_('Error !'), _("Su compania no es agente de retencion de ningun impuesto.\n\
+			Configure esto en Administracion/Companies "))
+		return False
         #~ verifico que la company sea agente de retencion de al menos un impuesto
-        if len(impuestos_ids) != 0:
+        else:
             #~ recorro todos los impuestos que corresponde retener según la "company" con la que estoy trabajando. (Actualmente está implementado solo ganancias).
             for impuesto in self.pool.get('account.tax.withhold').browse(cr, uid, impuestos_ids):
 		# import pdb;pdb.set_trace()
                 respins_idlist = self.pool.get('inscripto.impuesto').search(cr, uid, [('partner_id', '=', voucher.partner_id.id), ('account_tax_id', '=', impuesto.account_tax_id.id)])
-                #~ verifico que partner tenga asignado el regimen de ganancias, en caso de no aviso con un Error
+                #~ verifico que partner tenga asignado el regimen de ganancias, en caso de no permite seguir la operacion
                 if len(respins_idlist) == 0:
-                    raise osv.except_osv(_('Error !'), _("Debe configurar el provedor ' %s' con el regimen asignado por el AFIP.") % (voucher.partner_id.name))
+		    return False	
                 #~ WARRNINGGG: =ganancia (peligro) en caso de que si tiene asignado el regimen...
                 # elif len(respins_idlist) > 0 and impuesto.account_tax_id.name == "ganancias":
                 elif len(respins_idlist) > 0 and impuesto.account_tax_id.name == "01004000:G":
@@ -443,7 +439,6 @@ class account_voucher(osv.osv):
     def first_move_line_get(self, cr, uid, voucher_id, move_id, company_currency, current_currency, context=None):
         '''
         Return a dict to be use to create the first account move line of given voucher.
-
         :param voucher_id: Id of voucher what we are creating account_move.
         :param move_id: Id of account move where this line will be added.
         :param company_currency: id of currency of the company to which the voucher belong
@@ -492,7 +487,6 @@ class account_voucher(osv.osv):
     def second_move_line_get(self, cr, uid, voucher_id, move_id, company_currency, current_currency, context=None):
         '''
         Return a dict to be use to create the first account move line of given voucher.
-
         :param voucher_id: Id of voucher what we are creating account_move.
         :param move_id: Id of account move where this line will be added.
         :param company_currency: id of currency of the company to which the voucher belong
@@ -540,10 +534,3 @@ class account_voucher(osv.osv):
 
 account_voucher()
 
-
-    #~ def create(self, cursor, user, vals, context=None):
-        #~ if vals.has_key('monto_retencion') and vals.has_key('retencion'):
-            #~ self.pool.get('registro.retenciones').create(cr, uid,{ 'voucher_id': vals['id'], 'tax_id' : 1, 'monto':vals['monto_retencion']})
-        #~ return super(account_voucher, self).create(cursor, user, vals,context=context)
-
-account_voucher()

@@ -14,7 +14,7 @@
     'website': 'http://business.moldeo.coop',
     "category": "Accounting",
     "depends": ['account_voucher', 'l10n_ar_chart'],
-    'update_xml': [
+    'data': [
     'retenciones_view.xml',
     'retenciones_data.xml'
     ],

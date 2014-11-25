@@ -268,53 +268,6 @@ HDB dsd acount/partner_view.xml
             parent="account.menu_finance_payables"
             name="Retenciones" />
 
-<!--
-        <record model="ir.ui.view" id="view_regimenes_ganancia_form">
-            <field name="name">account.regimenes.form</field>
-            <field name="model">account.regimenes.ganancia</field>
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-                <form string="regimenes" >
-                    <field name="codigo_de_regimen"/>
-                    <field name="retener_porcentaje_inscripto"/>
-                    <field name="retener_porcentaje_no_inscripto"/>
-                    <field name="monto_no_sujeto_a_retencion"/>
-                    <field name="codigo_de_regimen"/>
-                    <field name="concepto_referencia"/>
-                </form>
-            </field>
-        </record>
--->
-<!--
-        <record id="view_tax_tree" model="ir.ui.view">
-            <field name="name">account.tax.tree</field>
-            <field name="model">account.tax</field>
-            <field name="type">tree</field>
-            <field name="field_parent">child_ids</field>
-            <field name="arch" type="xml">
-                <tree string="Account Tax">
-                    <field name="name"/>
-                    <field name="price_include" groups="base.group_extended"/>
-                    <field name="description"/>
-                </tree>
-            </field>
-        </record>
-        <record id="view_account_tax_search" model="ir.ui.view">
-            <field name="name">account.tax.search</field>
-            <field name="model">account.tax</field>
-            <field name="type">search</field>
-            <field name="arch" type="xml">
-                <search string="Search Taxes">
-                    <group col="10" colspan="4">
-                        <field name="name"/>
-                        <field name="description"/>
-                    </group>
-                </search>
-            </field>
-        </record>
--->
-
-
 
     </data>
 </openerp>

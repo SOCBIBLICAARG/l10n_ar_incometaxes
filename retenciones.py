@@ -21,6 +21,7 @@
 
 #import time
 import datetime
+from datetime import date
 #import account
 from openerp import netsvc
 from openerp.osv import fields, osv
@@ -127,8 +128,6 @@ class imponible_ganancias(osv.osv):
 imponible_ganancias()
 
 # ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
 
 
 # SECTOR PARTNER
@@ -143,7 +142,7 @@ class res_partner(osv.osv):
         'responsability_code': fields.related('responsability_id', 'code', readonly=True, type='char', size=8, relation='afip.responsability', string='Responsability Code'),
     }
 
-    # _sql_constraints = [('res_partner_constraint', 'unique(impuesto_ids)', 'Tax must be unique!')]
+    _sql_constraints = [('res_partner_constraint', 'unique(impuesto_ids)', 'Tax must be unique!')]
 
 res_partner()
 
@@ -190,15 +189,7 @@ class excepcion(osv.osv):
 
 excepcion()
 
-
-
-
 # ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-
-
-
 
 # SECTOR VOUCHER
 
@@ -245,18 +236,29 @@ class account_voucher(osv.osv):
         return [fecha_desde, fecha_hasta]
 
     def calcular_acumulado_pagos(self, cr, uid, company, partner, fecha, id_actual):
-        #logger = netsvc.Logger()
+	voucher = self.browse(cr,uid,id_actual)
+	if voucher.date:
+		year = int(voucher.date[0:4])
+	else:
+		today = date.today()
+		year = today.year		
         acumulado_pagos = 0
         ids = self.search(cr, uid, [('company_id', '=', company), ('partner_id', '=', partner), ('state', '=', 'posted'), ('id', '!=', id_actual)])
         #~ logger.notifyChannel('addons.', netsvc.LOG_WARNING, 'respins %s   partner %s' % (ids,partner))
         for voucher in self.pool.get('account.voucher').browse(cr, uid, ids):
-            acumulado_pagos += voucher.amount
+	    temp_year = int(voucher.date[0:4])
+	    if temp_year == year:
+	            acumulado_pagos += voucher.amount
         return (acumulado_pagos)
 
     def calcular_acumulado_retenciones(self, cr, uid, tax_id, company, partner, fecha, id_actual):
-        #logger = netsvc.Logger()
+	voucher = self.browse(cr,uid,id_actual)
+	if voucher.date:
+		year = int(voucher.date[0:4])
+	else:
+		today = date.today()
+		year = today.year		
         acumulado_retenciones = 0
-        #~ logger.notifyChannel('addons.', netsvc.LOG_WARNING, 'Date: %s  -- date str: %s' % (fecha,datetime.strptime(fecha, ' %Y-%m-%d'))
         voucher_ids = self.search(cr, uid, [('company_id', '=', company), ('partner_id', '=', partner), ('state', '=', 'posted'), ('id', '!=', id_actual)])
         i = 0
         ids = []
@@ -265,7 +267,9 @@ class account_voucher(osv.osv):
             i += 1
             #~ logger.notifyChannel('addons.', netsvc.LOG_WARNING, 'i: %s   ids: %s   voucher_id: %s   lala:%s   tx_id: %s ' % (i,ids,voucher_id,lala,tax_id))
         for retencion in self.pool.get('registro.retenciones').browse(cr, uid, ids):    # WARNIGGGGGG: debo filtrar antes por partner, company, etc....
-            acumulado_retenciones += retencion.monto
+	    temp_year = int(voucher.date[0:4])
+	    if temp_year == year:
+            	acumulado_retenciones += retencion.monto
         return (acumulado_retenciones)
 
     def calcular_retencion(self, cr, uid, ids, context):
@@ -277,12 +281,10 @@ class account_voucher(osv.osv):
             raise osv.except_osv(_('Error !'), _("Ingrese la fecha del comprobante"))
         impuestos_ids = self.pool.get('account.tax.withhold').search(cr, uid, [('res_company_id', '=', voucher.company_id.id)])
         #~ verifico que company sea agente de retencion de al menos 1 impuesto.
-	# import pdb;pdb.set_trace()
         if len(impuestos_ids) == 0:
         	raise osv.except_osv(_('Error !'), _("Su compania no es agente de retencion de ningun impuesto.\n\
 			Configure esto en Administracion/Companies "))
 		return False
-        #~ verifico que la company sea agente de retencion de al menos un impuesto
         else:
             #~ recorro todos los impuestos que corresponde retener según la "company" con la que estoy trabajando. (Actualmente está implementado solo ganancias).
             for impuesto in self.pool.get('account.tax.withhold').browse(cr, uid, impuestos_ids):
@@ -292,14 +294,11 @@ class account_voucher(osv.osv):
                 if len(respins_idlist) == 0:
 		    return False	
                 #~ WARRNINGGG: =ganancia (peligro) en caso de que si tiene asignado el regimen...
-                # elif len(respins_idlist) > 0 and impuesto.account_tax_id.name == "ganancias":
                 elif len(respins_idlist) > 0 and impuesto.account_tax_id.name == "01004000:G":
                     # logger.notifyChannel('addons.', netsvc.LOG_WARNING, 'paso 2%s   ' % (respins_idlist))
-                    logging.getLogger(__name__).warning('paso 2%s   ' % (respins_idlist))
                     monto_valido = 0
                     monto = 0
                     #~ Recorro todos los regimenes que tiene asignado el partner
-		    # import pdb;pdb.set_trace()
                     for respins in self.pool.get('inscripto.impuesto').browse(cr, uid, respins_idlist):
                         excepciones_ids = self.pool.get('excepcion').search(cr, uid, [('impuesto.id', '=', respins.id)])
                         # logger.notifyChannel('addons.', netsvc.LOG_WARNING, '  paso 3 (repite) %s   ' % (excepciones_ids))
@@ -308,7 +307,6 @@ class account_voucher(osv.osv):
                         for excepcion in self.pool.get('excepcion').browse(cr, uid, excepciones_ids):
                             if excepcion.fecha_desde_exceptuado <= voucher.date <= excepcion.fecha_hasta_exceptuado:
                                 saltar = True
-                            # logger.notifyChannel('addons.', netsvc.LOG_WARNING, '  excepcion    ' % ())
                             logging.getLogger(__name__).warning('  excepcion    ' % ())
                         if saltar:
                             continue
@@ -354,13 +352,7 @@ class account_voucher(osv.osv):
                             monto_total_retenido = monto_valido
                     if monto_valido != 0:
                         self.pool.get('registro.retenciones').create(cr, uid, {'voucher_id': ids[0], 'tax_id': tax_id, 'monto': monto_valido, 'regimen_id': regimen_id})
-                """
-                elif len(respins_idlist) > 0 and respins.account_tax_id.name="otro impuesto" :
-                nuevo código para el calculo de retencion de otro impuesto.
-                monto_total_retenido += monto_otroimpuesto
-                """
 	
-        logging.getLogger(__name__).warning('monto_retencion %s   ' % (monto_total_retenido))
         self.write(cr, uid, [ids[0]], {'monto_retencion': monto_total_retenido})
 	return True
 

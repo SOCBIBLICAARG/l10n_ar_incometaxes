@@ -187,17 +187,17 @@ excepcion()
 # SECTOR VOUCHER
 
 class registro_retenciones(osv.osv):
-    _name = "registro.retenciones"
-    _description = "Registro de las retenciones"
-    _columns = {
-    'voucher_id': fields.many2one('account.voucher', 'Voucher'),
-    'tax_id': fields.many2one('account.tax', 'Impuesto retenido'),
-    'monto': fields.float('Monto retenido'),
-    'regimen_id': fields.many2one('account.regimenes.ganancia', 'Regimen'),
-    'nro_retencion': fields.char('Nro de Retencion', size=26),
-    }
-    #_rec_name = 'account_tax_id'
-    _rec_name = 'voucher_id'
+	_name = "registro.retenciones"
+	_description = "Registro de las retenciones"
+	_columns = {
+		'voucher_id': fields.many2one('account.voucher', 'Voucher'),
+		'partner_id': fields.related('voucher_id','partner_id',type='many2one',relation='res.partner',string='Partner'),
+		'tax_id': fields.many2one('account.tax', 'Impuesto retenido'),
+		'monto': fields.float('Monto retenido'),
+		'regimen_id': fields.many2one('account.regimenes.ganancia', 'Regimen'),
+		'nro_retencion': fields.char('Nro de Retencion', size=26),
+	}
+	_rec_name = 'voucher_id'
 
 registro_retenciones()
 
@@ -206,10 +206,10 @@ class account_voucher(osv.osv):
     _name = "account.voucher"
     _inherit = "account.voucher"
     _columns = {
-    'on_change': fields.char('Calcular Retencion', size=20),
-    'monto_retencion': fields.float('Monto a retener', readonly="True"),
-    'retencion': fields.one2many('registro.retenciones', 'voucher_id', 'Impuesto a Retener'),
-    'journal_id': fields.many2one('account.journal', 'Journal', required=False, ondelete="cascade"),
+	    'on_change': fields.char('Calcular Retencion', size=20),
+	    'monto_retencion': fields.float('Monto a retener', readonly="True"),
+	    'retencion': fields.one2many('registro.retenciones', 'voucher_id', 'Impuesto a Retener'),
+	    'journal_id': fields.many2one('account.journal', 'Journal', required=False, ondelete="cascade"),
     }
 
     def calcular_fecha_desdehasta(self, cr, uid, fecha):
@@ -361,8 +361,8 @@ class account_voucher(osv.osv):
 		else:
 		        self.action_move_line_create(cr, uid, ids, context=context)
 		        self.calcular_retencion(cr, uid, ids, context=context)
-		        loco = self.pool.get('ir.sequence').get(cr, uid, 'nro_retencion')
-		        self.write(cr, uid, [ids[0]], {'nro_retencion': loco})
+		        # loco = self.pool.get('ir.sequence').get(cr, uid, 'nro_retencion')
+		        # self.write(cr, uid, [ids[0]], {'nro_retencion': loco})
 
         return True
 

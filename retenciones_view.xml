@@ -29,6 +29,9 @@
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
                 <data>
+-                <xpath expr="/form/sheet/field[@name='image']" position="after">		
+-                    <field name="responsability_code" invisible="1"/>		
+-                </xpath>
                     <notebook position="inside">
                         <page string="Condicion impuestos" attrs="{'invisible':[('responsability_code','!=','IVARI')]}">
                             <field colspan="4" context="{'impuesto_ids': impuesto_ids}" name="impuesto_ids" nolabel="1">
@@ -201,7 +204,8 @@
             <field name="model">registro.retenciones</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Retenciones" >
+                <tree string="Retenciones" >		
+		    <field name="partner_id"/>
                     <field name="voucher_id"/>
                     <field name="tax_id"/>
                     <field name="monto"/>
@@ -218,6 +222,7 @@
             <field name="arch" type="xml">
                 <form string="Retenciones" >
 			<group>
+		    	    <field name="partner_id"/>
 	                    <field name="voucher_id"/>
         	            <field name="tax_id"/>
                 	    <field name="monto"/>

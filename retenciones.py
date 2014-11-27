@@ -130,23 +130,6 @@ imponible_ganancias()
 # ---------------------------------------------------------------------
 
 
-# SECTOR PARTNER
-#
-class res_partner(osv.osv):
-    _name = "res.partner"
-    _inherit = "res.partner"
-    _description = "Inherit partner"
-    _rec_name = "impuesto_ids"
-    _columns = {
-        'impuesto_ids': fields.one2many('inscripto.impuesto', 'partner_id', 'Impuesto', translate=True, required=False, help='o'),
-        'responsability_code': fields.related('responsability_id', 'code', readonly=True, type='char', size=8, relation='afip.responsability', string='Responsability Code'),
-    }
-
-    _sql_constraints = [('res_partner_constraint', 'unique(impuesto_ids)', 'Tax must be unique!')]
-
-res_partner()
-
-
 #Es una extension de partner
 class inscripto_impuesto(osv.osv):
     _name = "inscripto.impuesto"
@@ -158,12 +141,22 @@ class inscripto_impuesto(osv.osv):
     'excepciones': fields.one2many('excepcion', 'impuesto', 'Excepcion'),
     'comentario': fields.char('Comentario', size=128),
     'partner_id': fields.many2one('res.partner', 'Partner'),
-    # product servicio?
     }
     _rec_name = 'account_tax_id'
 
 inscripto_impuesto()
 
+class res_partner(osv.osv):
+    _name = "res.partner"
+    _inherit = "res.partner"
+    _description = "Inherit partner"
+    _rec_name = "impuesto_ids"
+    _columns = {
+        'impuesto_ids': fields.one2many('inscripto.impuesto', 'partner_id', 'Impuesto', translate=True, required=False, help='o'),
+        'responsability_code': fields.related('responsability_id', 'code', readonly=True, type='char', size=8, relation='afip.responsability', string='Responsability Code'),
+    }
+
+res_partner()
 
 class excepcion(osv.osv):
     _name = "excepcion"
@@ -274,7 +267,11 @@ class account_voucher(osv.osv):
 
     def calcular_retencion(self, cr, uid, ids, context):
         idsint = int(ids[0])
-        cr.execute("DELETE FROM registro_retenciones WHERE voucher_id=%s ", (idsint,))
+        # cr.execute("DELETE FROM registro_retenciones WHERE voucher_id=%s ", (idsint,))
+	retenciones_obj = self.pool.get('registro.retenciones')
+	retenciones_id = retenciones_obj.search(cr,uid,pwd,'registro.retenciones',[('voucher_id','=',idsint)])
+	delete_id = retenciones_obj.unlink(cr,uid,pwd,'registro.retenciones','unlink',retenciones_id)
+
         monto_total_retenido = 0
         voucher = self.pool.get('account.voucher').browse(cr, uid, idsint)
         if not voucher.date:

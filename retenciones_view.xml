@@ -29,14 +29,8 @@
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
                 <data>
-                <xpath expr="/form/sheet/field[@name='image']" position="after">
-                    <field name="responsability_code" invisible="0"/>
-                </xpath>
                     <notebook position="inside">
                         <page string="Condicion impuestos" attrs="{'invisible':[('responsability_code','!=','IVARI')]}">
-<!--
-HDB dsd acount/partner_view.xml
--->
                             <field colspan="4" context="{'impuesto_ids': impuesto_ids}" name="impuesto_ids" nolabel="1">
                                 <form string="Tax details'HDB ">
 				    <group>

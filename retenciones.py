@@ -267,10 +267,6 @@ class account_voucher(osv.osv):
 
     def calcular_retencion(self, cr, uid, ids, context):
         idsint = int(ids[0])
-        # cr.execute("DELETE FROM registro_retenciones WHERE voucher_id=%s ", (idsint,))
-	retenciones_obj = self.pool.get('registro.retenciones')
-	retenciones_id = retenciones_obj.search(cr,uid,pwd,'registro.retenciones',[('voucher_id','=',idsint)])
-	delete_id = retenciones_obj.unlink(cr,uid,pwd,'registro.retenciones','unlink',retenciones_id)
 
         monto_total_retenido = 0
         voucher = self.pool.get('account.voucher').browse(cr, uid, idsint)
@@ -283,6 +279,10 @@ class account_voucher(osv.osv):
 			Configure esto en Administracion/Companies "))
 		return False
         else:
+            # cr.execute("DELETE FROM registro_retenciones WHERE voucher_id=%s ", (idsint,))
+	    retenciones_obj = self.pool.get('registro.retenciones')
+	    retenciones_id = retenciones_obj.search(cr,uid,[('voucher_id','=',idsint)])
+	    delete_id = retenciones_obj.unlink(cr,uid,retenciones_id)
             #~ recorro todos los impuestos que corresponde retener según la "company" con la que estoy trabajando. (Actualmente está implementado solo ganancias).
             for impuesto in self.pool.get('account.tax.withhold').browse(cr, uid, impuestos_ids):
 		# import pdb;pdb.set_trace()

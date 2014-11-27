@@ -244,15 +244,6 @@ HDB dsd acount/partner_view.xml
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
-<!--
-        defino act_window.view para relacionar action con tree y form
--->
-        <record id="action_view_registro_retenciones" model="ir.actions.act_window.view">
-            <field eval="20" name="sequence"/>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="view_registro_retenciones_form"/>
-            <field name="act_window_id" ref="action_registro_retenciones_tree"/>
-        </record>
 
         <record id="action_view_registro_retenciones" model="ir.actions.act_window.view">
             <field eval="20" name="sequence"/>
@@ -260,6 +251,37 @@ HDB dsd acount/partner_view.xml
             <field name="view_id" ref="view_registro_retenciones_tree"/>
             <field name="act_window_id" ref="action_registro_retenciones_tree"/>
         </record>
+
+<!-- Regimenes Ganancias -->
+
+        <record model="ir.ui.view" id="view_regimenes_ganancia_tree">
+            <field name="name">account.regimenes.ganancia.tree</field>
+            <field name="model">account.regimenes.ganancia</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Regimenes Ganancia" >
+			<field name="codigo_de_regimen" />
+			<field name="monto_no_sujeto_a_retencion" />
+			<field name="concepto_referencia" />
+			<field name="anexo_referencia" />
+			<field name="retener_porcentaje_no_inscripto" />
+			<field name="account_tax_id" />
+			<field name="retener_porcentaje_inscripto" />
+                </tree>
+            </field>
+        </record>
+
+
+        <record model="ir.actions.act_window" id="action_regimenes_ganancia_tree">
+            <field name="name">Regimenes Ganancias</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">account.regimenes.ganancia</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+
+
 <!--
          menu item retenciones
 -->
@@ -267,6 +289,11 @@ HDB dsd acount/partner_view.xml
             action="action_registro_retenciones_tree"
             parent="account.menu_finance_payables"
             name="Retenciones" />
+
+        <menuitem id="menu_regimenes_ganancia"
+            action="action_regimenes_ganancia_tree"
+            parent="account.next_id_27"
+            name="Regimenes Ganancias" />
 
 
     </data>

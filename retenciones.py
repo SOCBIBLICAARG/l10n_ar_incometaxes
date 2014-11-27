@@ -354,11 +354,15 @@ class account_voucher(osv.osv):
 	return True
 
     def proforma_voucher(self, cr, uid, ids, context=None):
-        # logger = netsvc.Logger()
-        self.action_move_line_create(cr, uid, ids, context=context)
-        self.calcular_retencion(cr, uid, ids, context=context)
-        loco = self.pool.get('ir.sequence').get(cr, uid, 'nro_retencion')
-        self.write(cr, uid, [ids[0]], {'nro_retencion': loco})
+	for voucher_id in ids:
+		voucher = self.browse(cr,uid,voucher_id)
+		if voucher.type != 'payment':
+			super(account_voucher,self).proforma_voucher(cr,uid,ids,context)
+		else:
+		        self.action_move_line_create(cr, uid, ids, context=context)
+		        self.calcular_retencion(cr, uid, ids, context=context)
+		        loco = self.pool.get('ir.sequence').get(cr, uid, 'nro_retencion')
+		        self.write(cr, uid, [ids[0]], {'nro_retencion': loco})
 
         return True
 

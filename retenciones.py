@@ -46,21 +46,6 @@ import logging
 # ---------------------------------------------------------------------
 
 
-
-# SECTOR COMPANY
-
-class res_company(osv.osv):
-    _name = "res.company"
-    _inherit = "res.company"
-    _description = "Inherit company"
-    _columns = {
-        'tax_withholding_ids': fields.one2many('account.tax.withhold', 'res_company_id', string='Impuesto a retener')
-    }
-    # _sql_constraints = [('res_company_constraint', 'unique(tax_withholding_ids)', 'Impuesto a retener must be unique!')]
-
-res_company()
-
-
 class account_tax(osv.osv):
     _name = "account.tax"
     _inherit = "account.tax"
@@ -76,15 +61,21 @@ account_tax()
 
 
 class account_tax_withhold(osv.osv):
-    _name = "account.tax.withhold"
-    _description = "Impuestos a retener"
-    _columns = {
-	    'account_tax_id': fields.many2one('account.tax', 'Codigo de impuesto'),
-	    'fecha': fields.date('Fecha'),
-	    'numero_agente': fields.char('Numero de Agente', size=15),
-	    'res_company_id': fields.many2one('res.company', 'Company'),
-	    }
-    _rec_name = 'account_tax_id'
+	_name = "account.tax.withhold"
+	_description = "Impuestos a retener"
+
+
+
+
+	_columns = {
+		'account_tax_id': fields.many2one('account.tax', 'Codigo de impuesto'),
+		'fecha': fields.date('Fecha'),
+		'numero_agente': fields.char('Numero de Agente', size=15),
+		'res_company_id': fields.many2one('res.company', 'Company'),
+		}
+	_rec_name = 'account_tax_id'
+
+
 
 account_tax_withhold()
 
@@ -231,26 +222,28 @@ class account_voucher(osv.osv):
     def calcular_acumulado_pagos(self, cr, uid, company, partner, fecha, id_actual):
 	voucher = self.browse(cr,uid,id_actual)
 	if voucher.date:
-		year = int(voucher.date[0:4])
+		year_month = voucher.date
+		year_month = year_month[0:7]
 	else:
 		today = date.today()
-		year = today.year		
+		year_month = str(today)[0:7]
         acumulado_pagos = 0
         ids = self.search(cr, uid, [('company_id', '=', company), ('partner_id', '=', partner), ('state', '=', 'posted'), ('id', '!=', id_actual)])
         #~ logger.notifyChannel('addons.', netsvc.LOG_WARNING, 'respins %s   partner %s' % (ids,partner))
         for voucher in self.pool.get('account.voucher').browse(cr, uid, ids):
-	    temp_year = int(voucher.date[0:4])
-	    if temp_year == year:
+	    temp_year_month = voucher.date[0:7]
+	    if temp_year_month == year_month:
 	            acumulado_pagos += voucher.amount
         return (acumulado_pagos)
 
     def calcular_acumulado_retenciones(self, cr, uid, tax_id, company, partner, fecha, id_actual):
 	voucher = self.browse(cr,uid,id_actual)
 	if voucher.date:
-		year = int(voucher.date[0:4])
+		year_month = voucher.date
+		year_month = year_month[0:7]
 	else:
 		today = date.today()
-		year = today.year		
+		year_month = str(today)[0:7]
         acumulado_retenciones = 0
         voucher_ids = self.search(cr, uid, [('company_id', '=', company), ('partner_id', '=', partner), ('state', '=', 'posted'), ('id', '!=', id_actual)])
         i = 0
@@ -260,8 +253,8 @@ class account_voucher(osv.osv):
             i += 1
             #~ logger.notifyChannel('addons.', netsvc.LOG_WARNING, 'i: %s   ids: %s   voucher_id: %s   lala:%s   tx_id: %s ' % (i,ids,voucher_id,lala,tax_id))
         for retencion in self.pool.get('registro.retenciones').browse(cr, uid, ids):    # WARNIGGGGGG: debo filtrar antes por partner, company, etc....
-	    temp_year = int(voucher.date[0:4])
-	    if temp_year == year:
+	    temp_year_month = voucher.date[0:7]
+	    if temp_year_month == year_month:
             	acumulado_retenciones += retencion.monto
         return (acumulado_retenciones)
 
